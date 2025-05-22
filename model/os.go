@@ -4,6 +4,8 @@ type (
 	OS string
 )
 
+// REMINDER: also insert the OS in map OperationalSystems whenever
+// a new OS is added as a constant.
 const (
 	Android OS = "android"
 	iOS     OS = "ios"

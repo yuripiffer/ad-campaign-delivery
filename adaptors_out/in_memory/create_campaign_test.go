@@ -5,7 +5,6 @@ import (
 	"ad-campaign-delivery/pkg"
 	"ad-campaign-delivery/pkg/logger"
 	"context"
-	"fmt"
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -114,13 +113,11 @@ func TestCampaignRepository_CreateCampaign(t *testing.T) {
 
 			// Verify lookup structure
 			lookupSlice := repo.campaignsLookup[tt.campaign.Country][tt.campaign.Device][tt.campaign.OS]
-			fmt.Println(lookupSlice)
 
 			assert.NotEmpty(t, lookupSlice)
 
 			foundInLookup := false
 			for position, lookup := range lookupSlice {
-				fmt.Sprintln(position, lookup)
 				if lookup.ID == tt.campaign.ID {
 					assert.Equal(t, tt.campaign.Bid, lookup.Bid)
 					foundInLookup = true

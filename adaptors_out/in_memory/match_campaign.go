@@ -6,11 +6,13 @@ import (
 	"context"
 )
 
+// MatchCampaign finds the highest available bid campaign to be delivered according to the
+// informed params. Once the campaign is chosen, the bid value is deducted from the campaign budget.
 func (r *CampaignRepository) MatchCampaign(ctx context.Context, country model.Country,
 	device model.Device, os model.OS) (*model.BidLookup, error) {
 
-	r.mu.RLock()
-	defer r.mu.RUnlock()
+	r.mu.Lock()
+	defer r.mu.Unlock()
 
 	orderedBids, ok := r.campaignsLookup[country][device][os]
 	if !ok || len(orderedBids) == 0 {

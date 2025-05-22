@@ -4,6 +4,8 @@ type (
 	Country string
 )
 
+// REMINDER: also insert the country in map Countries whenever
+// a new country is added as a constant.
 const (
 	France       Country = "FR"
 	Spain        Country = "ES"

@@ -7,7 +7,7 @@ import (
 )
 
 // CreateCampaign inserts a new campaign into the in-memory store.
-// All data should have already been validated.
+// All data must have already been validated in the domain.
 func (r *CampaignRepository) CreateCampaign(ctx context.Context, campaign model.Campaign) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -37,8 +37,8 @@ func (r *CampaignRepository) createTargetingKeys(campaign model.Campaign) {
 	}
 }
 
-// The logic that older campaigns with the same bid should be selected first is respected
-// in the order of the slice
+// insertBidInLookup guarantees that older campaigns with the same bid should be selected
+// first due to how to slice is populated
 func (r *CampaignRepository) insertBidInLookup(campaign model.Campaign) {
 	orderedBids := r.campaignsLookup[campaign.Country][campaign.Device][campaign.OS]
 	newBid := model.BidLookup{
@@ -57,7 +57,7 @@ func (r *CampaignRepository) insertBidInLookup(campaign model.Campaign) {
 		}
 	}
 
-	// Insert newBid at the determined index
+	// Insert new bidLookup at the determined index
 	r.campaignsLookup[campaign.Country][campaign.Device][campaign.OS] = append(
 		orderedBids[:low],
 		append([]model.BidLookup{newBid}, orderedBids[low:]...)...,
