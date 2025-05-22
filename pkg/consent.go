@@ -9,7 +9,7 @@ func CheckConsent(consentStr string, consentVendorID int) (bool, error) {
 	consent, err := iabconsent.ParseV2(consentStr)
 
 	if err != nil {
-		return false, Errorf(EINVALID, "failed to parse consent string: %w", err)
+		return false, Errorf(EINVALID, "failed to parse consent string: %s", err)
 	}
 
 	// Purposes related to personalized ads: are 1 and 4

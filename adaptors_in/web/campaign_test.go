@@ -3,43 +3,25 @@ package web
 import (
 	"ad-campaign-delivery/model"
 	"ad-campaign-delivery/pkg"
+	"ad-campaign-delivery/ports_in"
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 )
 
-type MockCampaignService struct {
-	mock.Mock
-}
-
-func (m *MockCampaignService) Create(ctx context.Context, campaign model.Campaign) error {
-	args := m.Called(ctx, campaign)
-	return args.Error(0)
-}
-
-func (m *MockCampaignService) Match(ctx context.Context, country model.Country, device model.Device, os model.OS) (*model.BidLookup, error) {
-	args := m.Called(ctx, country, device, os)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*model.BidLookup), args.Error(1)
-}
-
 func TestCampaignsHandler_Create(t *testing.T) {
 	tests := []struct {
-		name            string
-		input           CampaignCreateRequest
-		callCreate      bool
-		mockCreateError error
-		expectedCode    int
-		expectedBody    string
+		name         string
+		input        CampaignCreateRequest
+		callCreate   bool
+		createErr    error
+		expectedCode int
+		expectedBody string
 	}{
 		{
 			name: "successful creation",
@@ -51,9 +33,9 @@ func TestCampaignsHandler_Create(t *testing.T) {
 				Bid:     decimal.NewFromFloat(1.5),
 				Budget:  decimal.NewFromFloat(100),
 			},
-			callCreate:      true,
-			mockCreateError: nil,
-			expectedCode:    http.StatusCreated,
+			callCreate:   true,
+			createErr:    nil,
+			expectedCode: http.StatusCreated,
 		},
 		{
 			name: "missing ID",
@@ -155,21 +137,27 @@ func TestCampaignsHandler_Create(t *testing.T) {
 				Bid:     decimal.NewFromFloat(1.5),
 				Budget:  decimal.NewFromFloat(100),
 			},
-			callCreate:      true,
-			mockCreateError: pkg.Errorf(pkg.ECONFLICT, "campaign with ID camp123 already exists"),
-			expectedCode:    http.StatusConflict,
-			expectedBody:    "campaign with ID camp123 already exists",
+			callCreate:   true,
+			createErr:    pkg.Errorf(pkg.ECONFLICT, "campaign with ID camp123 already exists"),
+			expectedCode: http.StatusConflict,
+			expectedBody: "campaign with ID camp123 already exists",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mockService := new(MockCampaignService)
-			handler := CampaignsHandler{UseCase: mockService}
-
-			if tt.callCreate {
-				mockService.On("Create", mock.Anything, mock.Anything).Return(tt.mockCreateError)
+			campaignServiceMock := &ports_in.CampaignServiceMock{
+				CreateFunc: func(ctx context.Context, campaign model.Campaign) error {
+					assert.Equal(t, tt.input.ID, campaign.ID)
+					assert.Equal(t, model.Countries[tt.input.Country], campaign.Country)
+					assert.Equal(t, model.Devices[tt.input.Device], campaign.Device)
+					assert.Equal(t, model.OperationalSystems[tt.input.OS], campaign.OS)
+					assert.True(t, tt.input.Bid.Equal(campaign.Bid))
+					assert.True(t, tt.input.Budget.Equal(campaign.Budget))
+					return tt.createErr
+				},
 			}
+			handler := CampaignsHandler{UseCase: campaignServiceMock}
 
 			body, _ := json.Marshal(tt.input)
 			req := httptest.NewRequest(http.MethodPost, "/campaigns", bytes.NewBuffer(body))
@@ -181,14 +169,23 @@ func TestCampaignsHandler_Create(t *testing.T) {
 			if tt.expectedBody != "" {
 				assert.Contains(t, rec.Body.String(), tt.expectedBody)
 			}
-			mockService.AssertExpectations(t)
 		})
 	}
 }
 
 func TestCampaignsHandler_Match(t *testing.T) {
 
-	validConsentString := "CQMGLkAQMGLkABcAKEFRBbFgAP_gAEPgAAqIJnkR_C9MQWFjcT51AfskaYxHxgACoEQgBACJgygBCAPA8IQEwGAYIAxAAqAKAAAAoiRBAAAlCAhQAAAAQAAAACCMAEAAAAAAIKBAgAARAgEACAhBGQAAEAAAAIBBABAAgAAEQBoAQBAAAAAAAAAgAAAgAACBAAAIAAAAAAEAAAAIAEgAAAAAAAAAAAAAAlAIAAAIAAAAAAAAAAAIJngAmChEQAFgQAhAAGEECABQRgAAAAAgAACBggAACAAA4AQAUGAAAAAAAAAIAAAAggABAAABAAhAAAAAQAAAAAAIAAAAAAAAACBAAAABAAAAAAgAAQAAAAAAAABAABAAgAAAABAAQBAAAAAgAAAAAAAAAACAAAAAAAAAAAEAAAAIAEAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAA"
+	// String for TCF v2 format with valid consents
+	validConsentString := "CQMGLkAQMGLkABcAKEFRBbFgAP_gAEPgAAqIJnkR_C9MQWFjcT51AfskaYxHxgACo" +
+		"EQgBACJgygBCAPA8IQEwGAYIAxAAqAKAAAAoiRBAAAlCAhQAAAAQAAAACCMAEAAAAAAIKBAgAARAgEACAhB" +
+		"GQAAEAAAAIBBABAAgAAEQBoAQBAAAAAAAAAgAAAgAACBAAAIAAAAAAEAAAAIAEgAAAAAAAAAAAAAAlAIAAA" +
+		"IAAAAAAAAAAAIJngAmChEQAFgQAhAAGEECABQRgAAAAAgAACBggAACAAA4AQAUGAAAAAAAAAIAAAAggABAAA" +
+		"BAAhAAAAAQAAAAAAIAAAAAAAAACBAAAABAAAAAAgAAQAAAAAAAABAABAAgAAAABAAQBAAAAAgAAAAAAAAAAC" +
+		"AAAAAAAAAAAEAAAAIAEAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAA"
+
+	//Valid TCF v2 format, but missing consent
+	missingConsentString := "COtybn4Otybn4AcABBENAPCIAEBAAECAAIAAAAAAAAAAAgAA.YAAAAAAAAAAA"
+
 	successfulMatch := `{
 	"campaign_id": "camp123",
 	"bid": "1.5"
@@ -256,7 +253,7 @@ func TestCampaignsHandler_Match(t *testing.T) {
 		},
 		{
 			name:         "missing consent",
-			consentToken: "COtybn4Otybn4AcABBENAPCIAEBAAECAAIAAAAAAAAAAAgAA.YAAAAAAAAAAA",
+			consentToken: missingConsentString,
 			input: CampaignMatchRequest{
 				Country: "FR",
 				Device:  "mobile",
@@ -315,12 +312,13 @@ func TestCampaignsHandler_Match(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mockService := new(MockCampaignService)
-			handler := CampaignsHandler{UseCase: mockService}
-
-			if tt.callMatch {
-				mockService.On("Match", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(tt.mockMatchResponse, tt.mockMatchError)
+			campaignServiceMock := &ports_in.CampaignServiceMock{
+				MatchFunc: func(ctx context.Context, country model.Country, device model.Device,
+					os model.OS) (*model.BidLookup, error) {
+					return tt.mockMatchResponse, tt.mockMatchError
+				},
 			}
+			handler := CampaignsHandler{UseCase: campaignServiceMock}
 
 			body, _ := json.Marshal(tt.input)
 			req := httptest.NewRequest(http.MethodPost, "/deliver", bytes.NewBuffer(body))
@@ -333,12 +331,8 @@ func TestCampaignsHandler_Match(t *testing.T) {
 
 			assert.Equal(t, tt.expectedCode, rec.Code)
 			if tt.expectedBody != "" {
-				xreq := rec.Body.String()
-				xexpec := tt.expectedBody
-				fmt.Println(xreq, xexpec)
 				assert.Contains(t, rec.Body.String(), tt.expectedBody)
 			}
-			mockService.AssertExpectations(t)
 		})
 	}
 }
