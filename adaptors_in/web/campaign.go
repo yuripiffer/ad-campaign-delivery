@@ -23,6 +23,15 @@ type CampaignCreateRequest struct {
 	Budget  decimal.Decimal `json:"budget"`
 }
 
+// @Summary      Create a new campaign
+// @Description  A campaign and a bid lookup will be created with the provided fields.
+// @Tags         campaigns
+// @Accept       json
+// @Param        request  body  CampaignCreateRequest  true  "Campaign create request"
+// @Success      201      "Campaign created (no content)"
+// @Failure      400      {object}  pkg.ErrorResp
+// @Failure      500      {object}  pkg.ErrorResp
+// @Router       /campaigns [post]
 func (h *CampaignsHandler) create(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -95,6 +104,18 @@ type CampaignMatchResponse struct {
 	Bid        decimal.Decimal `json:"bid"`
 }
 
+// @Summary      Match a campaign
+// @Description  Matches a campaign based on country, device, and OS, after validating consent.
+// @Tags         campaigns
+// @Accept       json
+// @Produce      json
+// @Param        X-Consent-String  header  string                  true  "Consent string"
+// @Param        request           body    CampaignMatchRequest     true  "Campaign match request"
+// @Success      200               {object} CampaignMatchResponse   "Matched campaign"
+// @Success      204               "No matching campaign found"
+// @Failure      400               {object} pkg.ErrorResp
+// @Failure      500               {object} pkg.ErrorResp
+// @Router       /campaigns/match [post]
 func (h *CampaignsHandler) match(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
