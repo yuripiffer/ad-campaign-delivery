@@ -6,7 +6,7 @@ A Go-based system for managing and delivering ad campaigns based on targeting, c
 1. Have docker engine running
 2. Run the application using make:
    ```bash
-   make docker/start
+   make start
    ```
    The container will be serving in localhost:8080
 
@@ -98,6 +98,8 @@ curl --location 'http://localhost:8080/campaigns' \
   - Returns 200 status when a campaign match is found with id and bid,
   - Returns 204 when no campaign was found,
   - Returns 400+ status with formatted error.
+
+The bid value will be deducted from the budget of the campaign.
 
 OBS: At the moment, the code is considering as authorized the TCF token with personalized ads values 1 and 4 and vendor 1231.
   - curl example with authorized token:
