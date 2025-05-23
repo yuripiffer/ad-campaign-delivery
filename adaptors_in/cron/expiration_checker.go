@@ -10,6 +10,7 @@ type CampaignsHandler struct {
 	UseCase ports_in.CampaignService
 }
 
+// CampaignExpirationChecker checks for expired campaigns every midnight and turn them to inactive.
 func (h *CampaignsHandler) CampaignExpirationChecker(log zerolog.Logger) {
 	cronjob := cron.New()
 

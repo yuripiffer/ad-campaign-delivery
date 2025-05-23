@@ -9,8 +9,8 @@ import (
 // CreateCampaign inserts a new campaign into the in-memory store.
 // All data must have already been validated in the domain.
 func (r *CampaignRepository) CreateCampaign(ctx context.Context, campaign model.Campaign) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+	r.mu.RLock()
+	defer r.mu.RUnlock()
 
 	if _, ok := r.campaigns[campaign.ID]; ok {
 		return pkg.Errorf(pkg.ECONFLICT, "campaign with ID %s already exists", campaign.ID)

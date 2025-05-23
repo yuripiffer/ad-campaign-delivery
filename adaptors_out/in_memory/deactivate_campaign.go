@@ -5,8 +5,8 @@ import (
 )
 
 func (r *CampaignRepository) DeactivateExpiredCampaigns() {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+	r.mu.RLock()
+	defer r.mu.RUnlock()
 
 	for id, c := range r.campaigns {
 		if c.Active && c.ExpiresAt.Before(time.Now()) {

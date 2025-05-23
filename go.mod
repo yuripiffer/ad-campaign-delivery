@@ -6,7 +6,6 @@ toolchain go1.24.2
 
 require (
 	github.com/LiveRamp/iabconsent v0.5.5
-	github.com/caarlos0/env/v7 v7.1.0
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/rs/zerolog v1.34.0
 	github.com/shopspring/decimal v1.4.0

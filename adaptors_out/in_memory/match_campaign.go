@@ -11,9 +11,6 @@ import (
 func (r *CampaignRepository) MatchCampaign(ctx context.Context, country model.Country,
 	device model.Device, os model.OS) (*model.BidLookup, error) {
 
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
 	orderedBids, ok := r.campaignsLookup[country][device][os]
 	if !ok || len(orderedBids) == 0 {
 		return nil, pkg.Errorf(pkg.ENOTFOUND, "no campaign found for %s, %s, %s", country, device, os)
@@ -31,7 +28,11 @@ func (r *CampaignRepository) MatchCampaign(ctx context.Context, country model.Co
 }
 
 func (r *CampaignRepository) deductBudget(campaignID string) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
 	campaign, ok := r.campaigns[campaignID]
+	// this should not happen
 	if !ok {
 		r.log.Error().
 			Str("campaign_id", campaignID).
