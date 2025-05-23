@@ -33,3 +33,7 @@ func (s *Service) Create(ctx context.Context, campaign model.Campaign) error {
 func (s *Service) Match(ctx context.Context, country model.Country, device model.Device, os model.OS) (*model.BidLookup, error) {
 	return s.campaignRepository.MatchCampaign(ctx, country, device, os)
 }
+
+func (s *Service) DeactivateExpiredCampaigns() {
+	s.campaignRepository.DeactivateExpiredCampaigns()
+}

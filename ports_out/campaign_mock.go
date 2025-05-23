@@ -22,6 +22,9 @@ var _ CampaignRepository = &CampaignRepositoryMock{}
 //			CreateCampaignFunc: func(ctx context.Context, campaign model.Campaign) error {
 //				panic("mock out the CreateCampaign method")
 //			},
+//			DeactivateExpiredCampaignsFunc: func()  {
+//				panic("mock out the DeactivateExpiredCampaigns method")
+//			},
 //			MatchCampaignFunc: func(ctx context.Context, country model.Country, device model.Device, os model.OS) (*model.BidLookup, error) {
 //				panic("mock out the MatchCampaign method")
 //			},
@@ -35,6 +38,9 @@ type CampaignRepositoryMock struct {
 	// CreateCampaignFunc mocks the CreateCampaign method.
 	CreateCampaignFunc func(ctx context.Context, campaign model.Campaign) error
 
+	// DeactivateExpiredCampaignsFunc mocks the DeactivateExpiredCampaigns method.
+	DeactivateExpiredCampaignsFunc func()
+
 	// MatchCampaignFunc mocks the MatchCampaign method.
 	MatchCampaignFunc func(ctx context.Context, country model.Country, device model.Device, os model.OS) (*model.BidLookup, error)
 
@@ -46,6 +52,9 @@ type CampaignRepositoryMock struct {
 			Ctx context.Context
 			// Campaign is the campaign argument value.
 			Campaign model.Campaign
+		}
+		// DeactivateExpiredCampaigns holds details about calls to the DeactivateExpiredCampaigns method.
+		DeactivateExpiredCampaigns []struct {
 		}
 		// MatchCampaign holds details about calls to the MatchCampaign method.
 		MatchCampaign []struct {
@@ -59,8 +68,9 @@ type CampaignRepositoryMock struct {
 			Os model.OS
 		}
 	}
-	lockCreateCampaign sync.RWMutex
-	lockMatchCampaign  sync.RWMutex
+	lockCreateCampaign             sync.RWMutex
+	lockDeactivateExpiredCampaigns sync.RWMutex
+	lockMatchCampaign              sync.RWMutex
 }
 
 // CreateCampaign calls CreateCampaignFunc.
@@ -99,6 +109,33 @@ func (mock *CampaignRepositoryMock) CreateCampaignCalls() []struct {
 	mock.lockCreateCampaign.RLock()
 	calls = mock.calls.CreateCampaign
 	mock.lockCreateCampaign.RUnlock()
+	return calls
+}
+
+// DeactivateExpiredCampaigns calls DeactivateExpiredCampaignsFunc.
+func (mock *CampaignRepositoryMock) DeactivateExpiredCampaigns() {
+	callInfo := struct {
+	}{}
+	mock.lockDeactivateExpiredCampaigns.Lock()
+	mock.calls.DeactivateExpiredCampaigns = append(mock.calls.DeactivateExpiredCampaigns, callInfo)
+	mock.lockDeactivateExpiredCampaigns.Unlock()
+	if mock.DeactivateExpiredCampaignsFunc == nil {
+		return
+	}
+	mock.DeactivateExpiredCampaignsFunc()
+}
+
+// DeactivateExpiredCampaignsCalls gets all the calls that were made to DeactivateExpiredCampaigns.
+// Check the length with:
+//
+//	len(mockedCampaignRepository.DeactivateExpiredCampaignsCalls())
+func (mock *CampaignRepositoryMock) DeactivateExpiredCampaignsCalls() []struct {
+} {
+	var calls []struct {
+	}
+	mock.lockDeactivateExpiredCampaigns.RLock()
+	calls = mock.calls.DeactivateExpiredCampaigns
+	mock.lockDeactivateExpiredCampaigns.RUnlock()
 	return calls
 }
 

@@ -8,4 +8,5 @@ import (
 type CampaignRepository interface {
 	CreateCampaign(ctx context.Context, campaign model.Campaign) error
 	MatchCampaign(ctx context.Context, country model.Country, device model.Device, os model.OS) (*model.BidLookup, error)
+	DeactivateExpiredCampaigns()
 }
