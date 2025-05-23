@@ -20,8 +20,14 @@ func NewService(campaignRepository ports_out.CampaignRepository) *Service {
 }
 
 // Create sets up and saves a new campaign from the given payload.
-func (s *Service) Create(ctx context.Context, campaign model.Campaign) error {
-	campaign.CreatedAt = time.Now()
+func (s *Service) Create(ctx context.Context, campaign model.Campaign, activeDays int) error {
+	now := time.Now()
+
+	if activeDays > 0 {
+		campaign.ExpiresAt = now.AddDate(0, 0, activeDays)
+	}
+
+	campaign.CreatedAt = now
 	if campaign.Budget.GreaterThanOrEqual(campaign.Bid) {
 		campaign.Active = true
 	}

@@ -15,12 +15,13 @@ type CampaignsHandler struct {
 }
 
 type CampaignCreateRequest struct {
-	ID      string          `json:"id"`
-	Country string          `json:"country"`
-	Device  string          `json:"device"`
-	OS      string          `json:"os"`
-	Bid     decimal.Decimal `json:"bid"`
-	Budget  decimal.Decimal `json:"budget"`
+	ID         string          `json:"id"`
+	Country    string          `json:"country"`
+	Device     string          `json:"device"`
+	OS         string          `json:"os"`
+	Bid        decimal.Decimal `json:"bid"`
+	Budget     decimal.Decimal `json:"budget"`
+	ActiveDays int             `json:"active_days"`
 }
 
 // @Summary      Create a new campaign
@@ -84,7 +85,7 @@ func (h *CampaignsHandler) create(w http.ResponseWriter, r *http.Request) {
 		Budget:  input.Budget,
 	}
 
-	err = h.UseCase.Create(ctx, campaign)
+	err = h.UseCase.Create(ctx, campaign, input.ActiveDays)
 	if err != nil {
 		pkg.ErrorResponse(w, r, err)
 		return

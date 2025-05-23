@@ -12,9 +12,11 @@ import (
 
 func TestCampaignService_Create(t *testing.T) {
 	timeNowMock := time.Now()
+	expiresAtMock := timeNowMock.AddDate(0, 0, 30)
 	tests := []struct {
 		name              string
 		inputCampaign     model.Campaign
+		activeDays        int
 		CampaignToPersist model.Campaign
 		wantErr           bool
 	}{
@@ -29,16 +31,19 @@ func TestCampaignService_Create(t *testing.T) {
 				Bid: decimal.NewFromFloat(50), Budget: decimal.NewFromFloat(10),
 				Active: false, CreatedAt: timeNowMock},
 		},
+
 		{
-			name: "budget is equal to bid",
+			name: "budget is equal to bid, with expiration day",
 			inputCampaign: model.Campaign{
 				ID: "1", Country: model.France, Device: model.Mobile, OS: model.Android,
 				Bid: decimal.NewFromFloat(10), Budget: decimal.NewFromFloat(10)},
 
+			activeDays: 30,
+
 			CampaignToPersist: model.Campaign{
 				ID: "1", Country: model.France, Device: model.Mobile, OS: model.Android,
 				Bid: decimal.NewFromFloat(10), Budget: decimal.NewFromFloat(10),
-				Active: true, CreatedAt: timeNowMock},
+				Active: true, CreatedAt: timeNowMock, ExpiresAt: expiresAtMock},
 		},
 		{
 			name: "budget is higher than bid value",
@@ -58,17 +63,23 @@ func TestCampaignService_Create(t *testing.T) {
 			campaignRepo := &ports_out.CampaignRepositoryMock{
 				CreateCampaignFunc: func(ctx context.Context, c model.Campaign) error {
 
-					// avoid time differences
-					if !c.CreatedAt.IsZero() {
+					// add a bit of time tolerance to avoid time differences
+					if c.CreatedAt.Before(timeNowMock.Add(1*time.Minute)) &&
+						c.CreatedAt.After(timeNowMock.Add(-1*time.Minute)) {
 						c.CreatedAt = timeNowMock
 					}
+					if c.ExpiresAt.Before(expiresAtMock.Add(1*time.Minute)) &&
+						c.ExpiresAt.After(expiresAtMock.Add(-1*time.Minute)) {
+						c.ExpiresAt = expiresAtMock
+					}
+
 					assert.Equal(t, tt.CampaignToPersist, c)
 					return nil
 				},
 			}
 
 			service := NewService(campaignRepo)
-			err := service.Create(context.Background(), tt.inputCampaign)
+			err := service.Create(context.Background(), tt.inputCampaign, tt.activeDays)
 			assert.NoError(t, err)
 		})
 	}

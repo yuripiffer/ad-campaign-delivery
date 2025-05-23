@@ -31,6 +31,7 @@ func TestCampaignRepository_CreateCampaign(t *testing.T) {
 				Budget:    decimal.NewFromFloat(100.5),
 				Active:    true,
 				CreatedAt: time.Now(),
+				ExpiresAt: time.Now().AddDate(0, 0, 30),
 			},
 			lookupPosition: 0,
 			wantErr:        nil,

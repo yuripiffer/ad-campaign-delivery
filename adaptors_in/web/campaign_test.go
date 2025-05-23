@@ -26,12 +26,13 @@ func TestCampaignsHandler_Create(t *testing.T) {
 		{
 			name: "successful creation",
 			input: CampaignCreateRequest{
-				ID:      "camp123",
-				Country: "FR",
-				Device:  "mobile",
-				OS:      "android",
-				Bid:     decimal.NewFromFloat(1.5),
-				Budget:  decimal.NewFromFloat(100),
+				ID:         "camp123",
+				Country:    "FR",
+				Device:     "mobile",
+				OS:         "android",
+				Bid:        decimal.NewFromFloat(1.5),
+				Budget:     decimal.NewFromFloat(100),
+				ActiveDays: 30,
 			},
 			callCreate:   true,
 			createErr:    nil,
@@ -147,13 +148,14 @@ func TestCampaignsHandler_Create(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			campaignServiceMock := &ports_in.CampaignServiceMock{
-				CreateFunc: func(ctx context.Context, campaign model.Campaign) error {
+				CreateFunc: func(ctx context.Context, campaign model.Campaign, activeDays int) error {
 					assert.Equal(t, tt.input.ID, campaign.ID)
 					assert.Equal(t, model.Countries[tt.input.Country], campaign.Country)
 					assert.Equal(t, model.Devices[tt.input.Device], campaign.Device)
 					assert.Equal(t, model.OperationalSystems[tt.input.OS], campaign.OS)
 					assert.True(t, tt.input.Bid.Equal(campaign.Bid))
 					assert.True(t, tt.input.Budget.Equal(campaign.Budget))
+					assert.Equal(t, tt.input.ActiveDays, activeDays)
 					return tt.createErr
 				},
 			}

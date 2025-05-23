@@ -10,6 +10,8 @@ definitions:
     type: object
   web.CampaignCreateRequest:
     properties:
+      active_days:
+        type: integer
       bid:
         type: number
       budget:

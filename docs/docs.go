@@ -130,6 +130,9 @@ const docTemplate = `{
         "web.CampaignCreateRequest": {
             "type": "object",
             "properties": {
+                "active_days": {
+                    "type": "integer"
+                },
                 "bid": {
                     "type": "number"
                 },

@@ -19,7 +19,7 @@ var _ CampaignService = &CampaignServiceMock{}
 //
 //		// make and configure a mocked CampaignService
 //		mockedCampaignService := &CampaignServiceMock{
-//			CreateFunc: func(ctx context.Context, user model.Campaign) error {
+//			CreateFunc: func(ctx context.Context, user model.Campaign, activeDays int) error {
 //				panic("mock out the Create method")
 //			},
 //			DeactivateExpiredCampaignsFunc: func()  {
@@ -36,7 +36,7 @@ var _ CampaignService = &CampaignServiceMock{}
 //	}
 type CampaignServiceMock struct {
 	// CreateFunc mocks the Create method.
-	CreateFunc func(ctx context.Context, user model.Campaign) error
+	CreateFunc func(ctx context.Context, user model.Campaign, activeDays int) error
 
 	// DeactivateExpiredCampaignsFunc mocks the DeactivateExpiredCampaigns method.
 	DeactivateExpiredCampaignsFunc func()
@@ -52,6 +52,8 @@ type CampaignServiceMock struct {
 			Ctx context.Context
 			// User is the user argument value.
 			User model.Campaign
+			// ActiveDays is the activeDays argument value.
+			ActiveDays int
 		}
 		// DeactivateExpiredCampaigns holds details about calls to the DeactivateExpiredCampaigns method.
 		DeactivateExpiredCampaigns []struct {
@@ -74,13 +76,15 @@ type CampaignServiceMock struct {
 }
 
 // Create calls CreateFunc.
-func (mock *CampaignServiceMock) Create(ctx context.Context, user model.Campaign) error {
+func (mock *CampaignServiceMock) Create(ctx context.Context, user model.Campaign, activeDays int) error {
 	callInfo := struct {
-		Ctx  context.Context
-		User model.Campaign
+		Ctx        context.Context
+		User       model.Campaign
+		ActiveDays int
 	}{
-		Ctx:  ctx,
-		User: user,
+		Ctx:        ctx,
+		User:       user,
+		ActiveDays: activeDays,
 	}
 	mock.lockCreate.Lock()
 	mock.calls.Create = append(mock.calls.Create, callInfo)
@@ -91,7 +95,7 @@ func (mock *CampaignServiceMock) Create(ctx context.Context, user model.Campaign
 		)
 		return errOut
 	}
-	return mock.CreateFunc(ctx, user)
+	return mock.CreateFunc(ctx, user, activeDays)
 }
 
 // CreateCalls gets all the calls that were made to Create.
@@ -99,12 +103,14 @@ func (mock *CampaignServiceMock) Create(ctx context.Context, user model.Campaign
 //
 //	len(mockedCampaignService.CreateCalls())
 func (mock *CampaignServiceMock) CreateCalls() []struct {
-	Ctx  context.Context
-	User model.Campaign
+	Ctx        context.Context
+	User       model.Campaign
+	ActiveDays int
 } {
 	var calls []struct {
-		Ctx  context.Context
-		User model.Campaign
+		Ctx        context.Context
+		User       model.Campaign
+		ActiveDays int
 	}
 	mock.lockCreate.RLock()
 	calls = mock.calls.Create
