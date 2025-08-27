@@ -1,13 +1,14 @@
 package campaign
 
 import (
-	"ad-campaign-delivery/model"
-	"ad-campaign-delivery/ports_out"
 	"context"
-	"github.com/shopspring/decimal"
-	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
+
+	"ad-campaign-delivery/model"
+	"ad-campaign-delivery/ports_out"
+	"github.com/shopspring/decimal"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestCampaignService_Create(t *testing.T) {

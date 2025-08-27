@@ -1,17 +1,18 @@
 package web
 
 import (
-	"ad-campaign-delivery/model"
-	"ad-campaign-delivery/pkg"
-	"ad-campaign-delivery/ports_in"
 	"bytes"
 	"context"
 	"encoding/json"
-	"github.com/shopspring/decimal"
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"ad-campaign-delivery/model"
+	"ad-campaign-delivery/pkg"
+	"ad-campaign-delivery/ports_in"
+	"github.com/shopspring/decimal"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestCampaignsHandler_Create(t *testing.T) {

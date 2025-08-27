@@ -1,13 +1,14 @@
 package in_memory
 
 import (
-	"ad-campaign-delivery/model"
-	"ad-campaign-delivery/pkg"
 	"context"
-	"github.com/shopspring/decimal"
-	"github.com/stretchr/testify/assert"
 	"sync"
 	"testing"
+
+	"ad-campaign-delivery/model"
+	"ad-campaign-delivery/pkg"
+	"github.com/shopspring/decimal"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestCampaignRepository_MatchCampaign(t *testing.T) {

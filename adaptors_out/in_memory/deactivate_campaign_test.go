@@ -1,9 +1,10 @@
 package in_memory
 
 import (
-	"ad-campaign-delivery/model"
 	"testing"
 	"time"
+
+	"ad-campaign-delivery/model"
 )
 
 func TestDeactivateExpiredCampaigns(t *testing.T) {

@@ -1,10 +1,11 @@
 package in_memory
 
 import (
+	"sync"
+
 	"ad-campaign-delivery/model"
 	"ad-campaign-delivery/ports_out"
 	"github.com/rs/zerolog"
-	"sync"
 )
 
 type CampaignRepository struct {

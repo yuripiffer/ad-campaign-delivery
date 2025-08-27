@@ -1,13 +1,14 @@
 package web
 
 import (
+	"encoding/json"
+	"fmt"
+	"net/http"
+
 	"ad-campaign-delivery/model"
 	"ad-campaign-delivery/pkg"
 	"ad-campaign-delivery/ports_in"
-	"encoding/json"
-	"fmt"
 	"github.com/shopspring/decimal"
-	"net/http"
 )
 
 type CampaignsHandler struct {

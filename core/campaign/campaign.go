@@ -1,11 +1,12 @@
 package campaign
 
 import (
+	"context"
+	"time"
+
 	"ad-campaign-delivery/model"
 	"ad-campaign-delivery/ports_in"
 	"ad-campaign-delivery/ports_out"
-	"context"
-	"time"
 )
 
 type Service struct {

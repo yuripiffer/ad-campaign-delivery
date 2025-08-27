@@ -1,8 +1,9 @@
 package model
 
 import (
-	"github.com/shopspring/decimal"
 	"time"
+
+	"github.com/shopspring/decimal"
 )
 
 // Campaign represents the complete advertising campaign

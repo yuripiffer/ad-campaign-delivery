@@ -1,8 +1,9 @@
 package web
 
 import (
-	"ad-campaign-delivery/ports_in"
 	"net/http"
+
+	"ad-campaign-delivery/ports_in"
 )
 
 func ConfigureCampaignRoutes(u ports_in.CampaignService, r *http.ServeMux) {

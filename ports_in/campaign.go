@@ -1,8 +1,9 @@
 package ports_in
 
 import (
-	"ad-campaign-delivery/model"
 	"context"
+
+	"ad-campaign-delivery/model"
 )
 
 //go:generate go run github.com/matryer/moq -out campaign_mock.go -stub . CampaignService
