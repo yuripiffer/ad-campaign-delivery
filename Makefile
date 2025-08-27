@@ -5,6 +5,9 @@ GOLANGCICMD ?= golangci-lint
 
 .PHONY: *
 
+# needed for the performance tests
+SHELL := /bin/bash
+
 # start: runs the service in docker, remember to start docker first.
 start: docker/check-engine docker/build docker/run
 
@@ -54,3 +57,17 @@ swagger/generate:
 # tidy: tidy dependencies
 tidy:
 	$(GO_CMD) mod tidy
+
+# dev/install: development dependencies
+dev/install:
+	go install github.com/tsenart/vegeta/v12@latest
+
+# performance/deliver: benchmarks performance of 'deliver endpoint'
+performance/deliver:
+	echo "POST http://localhost:8080/deliver" | vegeta attack \
+      -duration=10s -rate=50 \
+      -header "Content-Type: application/json" \
+      -header "X-Consent-String: CQMGLkAQMGLkABcAKEFRBbFgAP_gAEPgAAqIJnkR_C9MQWFjcT51AfskaYxHxgACoEQgBACJgygBCAPA8IQEwGAYIAxAAqAKAAAAoiRBAAAlCAhQAAAAQAAAACCMAEAAAAAAIKBAgAARAgEACAhBGQAAEAAAAIBBABAAgAAEQBoAQBAAAAAAAAAgAAAgAACBAAAIAAAAAAEAAAAIAEgAAAAAAAAAAAAAAlAIAAAIAAAAAAAAAAAIJngAmChEQAFgQAhAAGEECABQRgAAAAAgAACBggAACAAA4AQAUGAAAAAAAAAIAAAAggABAAABAAhAAAAAQAAAAAAIAAAAAAAAACBAAAABAAAAAAgAAQAAAAAAAABAABAAgAAAABAAQBAAAAAgAAAAAAAAAACAAAAAAAAAAAEAAAAIAEAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAA" \
+      -body <(printf '{"country":"FR","device":"mobile","os":"ios"}') \
+      | vegeta report
+
